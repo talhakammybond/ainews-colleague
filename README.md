@@ -1,4 +1,4 @@
-# 🛰️ AI Colleague — FutureProof AI Systems
+# 🛰️ AI News Colleague — FutureProof AI Systems 
 
 Real-time news pulled from the web, rewritten under 160 characters by AI.
 Export as PNG, JPG, PDF, Word, or TXT.
