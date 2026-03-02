@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Colleague | FutureProof AI Systems</title>
+  <meta name="description" content="Real-time AI news colleague. Live headlines under 160 characters, instantly exportable." />
+  <meta name="theme-color" content="#38bdf8" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ── Reset & Tokens ──────────────────────────────────────── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --bg        : #0a0a0f;
+      --surface   : #0f172a;
+      --elevated  : #1e293b;
+      --border    : rgba(56,189,248,0.18);
+      --border-h  : rgba(56,189,248,0.45);
+      --primary   : #38bdf8;
+      --primary-d : #0ea5e9;
+      --accent    : #22d3ee;
+      --text      : #f0f9ff;
+      --text-sec  : #bae6fd;
+      --text-mut  : #7dd3fc;
+      --danger    : rgba(239,68,68,0.12);
+      --danger-b  : rgba(239,68,68,0.35);
+      --r         : 1rem;
+      --r-sm      : 0.6rem;
+      --font      : 'Poppins', system-ui, sans-serif;
+      --glow      : 0 0 30px rgba(56,189,248,0.25);
+    }
+
+    html { scroll-behavior:smooth; }
+
+    body {
+      font-family : var(--font);
+      background  : var(--bg);
+      color       : var(--text);
+      min-height  : 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      display         : flex;
+      align-items     : center;
+      justify-content : space-between;
+      padding         : 0.9rem 2rem;
+      border-bottom   : 1px solid var(--border);
+      background      : rgba(10,10,15,0.85);
+      backdrop-filter : blur(16px);
+      position        : sticky;
+      top             : 0;
+      z-index         : 100;
+    }
+    .nav-brand {
+      display        : flex;
+      align-items    : center;
+      gap            : 0.5rem;
+      text-decoration: none;
+      color          : var(--text);
+      font-weight    : 700;
+      font-size      : 1rem;
+    }
+    .nav-brand:hover { color: var(--primary); }
+    .nav-badge {
+      background  : rgba(56,189,248,0.12);
+      color       : var(--primary);
+      border      : 1px solid var(--border);
+      padding     : 0.2rem 0.75rem;
+      border-radius: 50px;
+      font-size   : 0.75rem;
+      font-weight : 600;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    main { max-width:980px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .hero {
+      text-align    : center;
+      margin-bottom : 2.5rem;
+      padding       : 0.5rem 0;
+    }
+    .hero-icon {
+      font-size     : 3rem;
+      margin-bottom : 0.75rem;
+      display       : block;
+      filter        : drop-shadow(0 0 20px rgba(56,189,248,0.5));
+      animation     : bob 4s ease-in-out infinite;
+    }
+    @keyframes bob {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-8px); }
+    }
+    .hero h1 {
+      font-size   : clamp(1.9rem, 5vw, 3.2rem);
+      font-weight : 800;
+      line-height : 1.15;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 .grad {
+      background             : linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip        : text;
+    }
+    .hero p {
+      color      : var(--text-sec);
+      font-size  : 1.05rem;
+      max-width  : 540px;
+      margin     : 0 auto;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* ── Search Card ─────────────────────────────────────────── */
+    .search-card {
+      background      : rgba(30,41,59,0.6);
+      border          : 1px solid var(--border);
+      border-radius   : calc(var(--r) * 1.3);
+      padding         : 1.75rem;
+      margin-bottom   : 1.75rem;
+      backdrop-filter : blur(14px);
+      box-shadow      : var(--glow);
+    }
+    .search-row {
+      display  : flex;
+      gap      : 0.75rem;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex         : 1;
+      min-width    : 200px;
+      background   : var(--surface);
+      border       : 1px solid var(--border);
+      border-radius: 50px;
+      padding      : 0.75rem 1.35rem;
+      color        : var(--text);
+      font-family  : var(--font);
+      font-size    : 0.95rem;
+      outline      : none;
+      transition   : border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow  : 0 0 0 3px rgba(56,189,248,0.12);
+    }
+    .search-input::placeholder { color:var(--text-mut); }
+
+    .btn-go {
+      background   : linear-gradient(135deg, var(--primary), var(--primary-d));
+      color        : #082f49;
+      border       : none;
+      border-radius: 50px;
+      padding      : 0.75rem 1.8rem;
+      font-family  : var(--font);
+      font-weight  : 700;
+      font-size    : 0.95rem;
+      cursor       : pointer;
+      display      : flex;
+      align-items  : center;
+      gap          : 0.45rem;
+      white-space  : nowrap;
+      transition   : transform 0.2s, box-shadow 0.2s;
+      box-shadow   : 0 4px 16px rgba(56,189,248,0.35);
+    }
+    .btn-go:hover    { transform:translateY(-2px); box-shadow:0 8px 24px rgba(56,189,248,0.45); }
+    .btn-go:active   { transform:translateY(0); }
+    .btn-go:disabled { opacity:0.45; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    /* ── Chips ───────────────────────────────────────────────── */
+    .chips {
+      display   : flex;
+      flex-wrap : wrap;
+      gap       : 0.5rem;
+      margin-top: 1.1rem;
+    }
+    .chip {
+      background   : rgba(56,189,248,0.07);
+      border       : 1px solid var(--border);
+      color        : var(--text-mut);
+      border-radius: 50px;
+      padding      : 0.3rem 0.95rem;
+      font-size    : 0.8rem;
+      font-weight  : 500;
+      cursor       : pointer;
+      transition   : all 0.18s;
+      user-select  : none;
+    }
+    .chip:hover  { background:rgba(56,189,248,0.15); border-color:var(--primary); color:var(--primary); }
+    .chip.active { background:rgba(56,189,248,0.2);  border-color:var(--primary); color:var(--primary); }
+
+    /* ── Export Bar ──────────────────────────────────────────── */
+    .export-bar {
+      display        : flex;
+      align-items    : center;
+      gap            : 0.5rem;
+      flex-wrap      : wrap;
+      margin-bottom  : 1.4rem;
+      opacity        : 0;
+      pointer-events : none;
+      transition     : opacity 0.35s;
+    }
+    .export-bar.show { opacity:1; pointer-events:auto; }
+    .export-label {
+      color      : var(--text-mut);
+      font-size  : 0.82rem;
+      font-weight: 600;
+      margin-right: 0.1rem;
+    }
+    .btn-exp {
+      background   : rgba(30,41,59,0.75);
+      border       : 1px solid var(--border);
+      color        : var(--text-sec);
+      border-radius: 50px;
+      padding      : 0.33rem 0.9rem;
+      font-family  : var(--font);
+      font-size    : 0.8rem;
+      font-weight  : 500;
+      cursor       : pointer;
+      display      : flex;
+      align-items  : center;
+      gap          : 0.3rem;
+      transition   : all 0.18s;
+    }
+    .btn-exp:hover { border-color:var(--primary); color:var(--primary); background:rgba(56,189,248,0.08); }
+
+    /* ── Loading ─────────────────────────────────────────────── */
+    #loading {
+      display    : none;
+      text-align : center;
+      padding    : 3.5rem 1rem;
+    }
+    #loading.show { display:block; }
+    .spinner {
+      width        : 42px;
+      height       : 42px;
+      border       : 3px solid var(--border);
+      border-top   : 3px solid var(--primary);
+      border-radius: 50%;
+      animation    : spin 0.75s linear infinite;
+      margin       : 0 auto 1.1rem;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #loading p { color:var(--text-mut); font-size:0.9rem; }
+
+    /* ── Error ───────────────────────────────────────────────── */
+    #error {
+      display      : none;
+      background   : var(--danger);
+      border       : 1px solid var(--danger-b);
+      border-radius: var(--r);
+      padding      : 1rem 1.5rem;
+      color        : #fca5a5;
+      margin-bottom: 1.5rem;
+      font-size    : 0.9rem;
+      line-height  : 1.6;
+    }
+    #error.show { display:block; }
+
+    /* ── Results ─────────────────────────────────────────────── */
+    #results { display:none; }
+    #results.show { display:block; }
+
+    .results-header {
+      display        : flex;
+      align-items    : center;
+      justify-content: space-between;
+      margin-bottom  : 1rem;
+      flex-wrap      : wrap;
+      gap            : 0.5rem;
+    }
+    .results-title {
+      font-size  : 1rem;
+      font-weight: 600;
+      color      : var(--text-sec);
+    }
+    .results-title span {
+      color: var(--primary);
+    }
+    .badge {
+      background   : rgba(56,189,248,0.14);
+      color        : var(--primary);
+      border-radius: 50px;
+      padding      : 0.22rem 0.8rem;
+      font-size    : 0.78rem;
+      font-weight  : 600;
+    }
+
+    /* ── Grid ────────────────────────────────────────────────── */
+    #grid {
+      display              : grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px,1fr));
+      gap                  : 1rem;
+    }
+
+    /* ── News Card ───────────────────────────────────────────── */
+    .card {
+      background      : rgba(30,41,59,0.65);
+      border          : 1px solid var(--border);
+      border-radius   : var(--r);
+      padding         : 1.3rem;
+      backdrop-filter : blur(10px);
+      display         : flex;
+      flex-direction  : column;
+      gap             : 0.8rem;
+      position        : relative;
+      overflow        : hidden;
+      transition      : transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+      animation       : fadeUp 0.4s ease-out both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .card::before {
+      content      : '';
+      position     : absolute;
+      top:0; left:0;
+      width        : 3px;
+      height       : 100%;
+      background   : linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 3px 0 0 3px;
+    }
+    .card:hover {
+      transform   : translateY(-5px);
+      box-shadow  : 0 14px 35px rgba(56,189,248,0.14);
+      border-color: var(--border-h);
+    }
+
+    .card-tag {
+      display      : inline-flex;
+      align-items  : center;
+      gap          : 0.28rem;
+      background   : rgba(56,189,248,0.1);
+      color        : var(--accent);
+      border-radius: 50px;
+      padding      : 0.18rem 0.65rem;
+      font-size    : 0.7rem;
+      font-weight  : 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width        : fit-content;
+    }
+
+    .card-headline {
+      font-size  : 0.94rem;
+      font-weight: 600;
+      color      : var(--text);
+      line-height: 1.55;
+      flex       : 1;
+    }
+
+    .card-meta {
+      display    : flex;
+      align-items: center;
+      gap        : 0.5rem;
+      flex-wrap  : wrap;
+    }
+    .card-source {
+      display    : flex;
+      align-items: center;
+      gap        : 0.3rem;
+      font-size  : 0.78rem;
+      color      : var(--text-mut);
+      font-weight: 500;
+      flex       : 1;
+    }
+    .card-source i { color:var(--primary); font-size:0.45rem; }
+    .card-source a { color:var(--primary); text-decoration:none; }
+    .card-source a:hover { text-decoration:underline; }
+
+    .card-chars {
+      font-size : 0.68rem;
+      color     : var(--text-mut);
+      opacity   : 0.55;
+    }
+
+    .btn-copy {
+      background   : none;
+      border       : 1px solid var(--border);
+      border-radius: 50px;
+      color        : var(--text-mut);
+      padding      : 0.2rem 0.6rem;
+      font-size    : 0.72rem;
+      font-family  : var(--font);
+      cursor       : pointer;
+      display      : flex;
+      align-items  : center;
+      gap          : 0.25rem;
+      transition   : all 0.18s;
+      white-space  : nowrap;
+    }
+    .btn-copy:hover { border-color:var(--primary); color:var(--primary); }
+    .btn-copy.done  { border-color:#4ade80; color:#4ade80; }
+
+    /* ── Empty & Timestamp ───────────────────────────────────── */
+    .empty {
+      text-align : center;
+      padding    : 4.5rem 1rem;
+      color      : var(--text-mut);
+    }
+    .empty i { font-size:2.8rem; margin-bottom:1rem; display:block; opacity:0.35; }
+    .empty p { font-size:1rem; line-height:1.65; }
+
+    .timestamp {
+      text-align : center;
+      color      : var(--text-mut);
+      font-size  : 0.75rem;
+      margin-top : 1.5rem;
+      opacity    : 0.5;
+    }
+
+    /* ── Snapshot wrapper (for image export) ─────────────────── */
+    #snap {
+      background   : var(--bg);
+      border-radius: var(--r);
+      padding      : 0.25rem;
+    }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    #toast {
+      position     : fixed;
+      bottom       : 2rem;
+      left         : 50%;
+      transform    : translateX(-50%) translateY(80px);
+      background   : var(--elevated);
+      border       : 1px solid var(--border);
+      color        : var(--text);
+      padding      : 0.6rem 1.6rem;
+      border-radius: 50px;
+      font-size    : 0.85rem;
+      font-weight  : 500;
+      z-index      : 999;
+      pointer-events: none;
+      transition   : transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    #toast.show { transform:translateX(-50%) translateY(0); }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width:640px) {
+      nav    { padding:0.75rem 1rem; }
+      main   { padding:1.75rem 1rem 4rem; }
+      .search-row   { flex-direction:column; }
+      .btn-go       { justify-content:center; }
+      #grid         { grid-template-columns:1fr; }
+      .export-bar   { gap:0.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ───────────────────────────────────────────────────── -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <span>🌱</span> FutureProof AI
+  </a>
+  <span class="nav-badge">🤖 AI Colleague Beta</span>
+</nav>
+
+<!-- ── Main ──────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Hero -->
+  <div class="hero">
+    <span class="hero-icon">🛰️</span>
+    <h1>Your <span class="grad">AI Colleague</span></h1>
+    <p>Live news pulled from the web, rewritten under 160 characters. Export and share in seconds.</p>
+  </div>
+
+  <!-- Search Card -->
+  <div class="search-card">
+    <div class="search-row">
+      <input
+        id="q"
+        class="search-input"
+        type="text"
+        placeholder="e.g.  AI agents,  OpenClaw,  tech funding,  climate…"
+        maxlength="120"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="btn-go" id="goBtn" onclick="search()">
+        <i class="fas fa-bolt"></i> Get Updates
+      </button>
+    </div>
+
+    <!-- Topic chips -->
+    <div class="chips">
+      <span class="chip" onclick="chip(this,'AI & Machine Learning')">🤖 AI</span>
+      <span class="chip" onclick="chip(this,'OpenClaw AI tool')">🦞 OpenClaw</span>
+      <span class="chip" onclick="chip(this,'startup funding 2025')">🚀 Startups</span>
+      <span class="chip" onclick="chip(this,'cybersecurity threats')">🔐 Security</span>
+      <span class="chip" onclick="chip(this,'climate change energy')">🌍 Climate</span>
+      <span class="chip" onclick="chip(this,'bitcoin crypto web3')">₿ Crypto</span>
+      <span class="chip" onclick="chip(this,'global economy markets')">📈 Markets</span>
+      <span class="chip" onclick="chip(this,'health medical science')">🏥 Health</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="error"></div>
+
+  <!-- Export Bar -->
+  <div class="export-bar" id="exportBar">
+    <span class="export-label"><i class="fas fa-share-nodes"></i> Export:</span>
+    <button class="btn-exp" onclick="exp('png')">  <i class="fas fa-image"></i>     PNG</button>
+    <button class="btn-exp" onclick="exp('jpg')">  <i class="fas fa-image"></i>     JPG</button>
+    <button class="btn-exp" onclick="exp('pdf')">  <i class="fas fa-file-pdf"></i>  PDF</button>
+    <button class="btn-exp" onclick="exp('txt')">  <i class="fas fa-file-lines"></i> TXT</button>
+    <button class="btn-exp" onclick="exp('word')">&nbsp;<i class="fas fa-file-word"></i>  Word</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Fetching live headlines &amp; rewriting with AI…</p>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="results-header">
+      <p class="results-title">Latest on: <span id="topicLabel"></span></p>
+      <span class="badge" id="countBadge"></span>
+    </div>
+    <div id="snap">
+      <div id="grid"></div>
+    </div>
+    <p class="timestamp" id="ts"></p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty" id="empty">
+    <i class="fas fa-satellite-dish"></i>
+    <p>Type any topic above and hit <strong>Get Updates</strong><br>to pull the latest news instantly.</p>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ── State ─────────────────────────────────────────────────── */
+let articles = [];
+let topic    = '';
+
+/* ── Helpers ───────────────────────────────────────────────── */
+const $   = id => document.getElementById(id);
+const on  = (el, cls) => el.classList.add(cls);
+const off = (el, cls) => el.classList.remove(cls);
+
+function toast(msg, ms = 2400) {
+  const t = $('toast');
+  t.textContent = msg;
+  on(t, 'show');
+  setTimeout(() => off(t, 'show'), ms);
+}
+
+/* ── Chip click ─────────────────────────────────────────────── */
+function chip(el, t) {
+  document.querySelectorAll('.chip').forEach(c => off(c,'active'));
+  on(el, 'active');
+  $('q').value = t;
+  search();
+}
+
+/* ── Enter key ──────────────────────────────────────────────── */
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
+
+/* ── Search ─────────────────────────────────────────────────── */
+async function search() {
+  const val = $('q').value.trim();
+  if (!val) { toast('Please type a topic first ✏️'); return; }
+
+  topic = val;
+
+  // UI reset
+  $('empty').style.display  = 'none';
+  off($('results'), 'show');
+  off($('exportBar'), 'show');
+  off($('error'), 'show');
+  on($('loading'), 'show');
+  $('goBtn').disabled = true;
+
+  try {
+    const res  = await fetch('/api/news', {
+      method  : 'POST',
+      headers : { 'Content-Type': 'application/json' },
+      body    : JSON.stringify({ topic: val })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+
+    articles = data.articles || [];
+    render(articles);
+
+  } catch (err) {
+    const el = $('error');
+    el.innerHTML = `<i class="fas fa-triangle-exclamation"></i>  ${err.message}`;
+    on(el, 'show');
+    $('empty').style.display = 'none';
+  } finally {
+    off($('loading'), 'show');
+    $('goBtn').disabled = false;
+  }
+}
+
+/* ── Render cards ───────────────────────────────────────────── */
+function render(list) {
+  const grid = $('grid');
+  grid.innerHTML = '';
+
+  if (!list.length) {
+    grid.innerHTML = `<p style="color:var(--text-mut);grid-column:1/-1;text-align:center;padding:2rem">
+      No articles found for <strong>${esc(topic)}</strong>. Try a broader term.</p>`;
+  } else {
+    list.forEach((a, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = `${i * 0.07}s`;
+      card.innerHTML = `
+        <div class="card-tag"><i class="fas fa-circle-dot"></i>${esc(a.category)}</div>
+        <p  class="card-headline">${esc(a.headline)}</p>
+        <div class="card-meta">
+          <span class="card-source">
+            <i class="fas fa-circle"></i>
+            ${a.url && a.url !== '#'
+              ? `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.source)}</a>`
+              : esc(a.source)
+            }
+          </span>
+          <span class="card-chars">${a.headline.length}/160</span>
+          <button class="btn-copy" id="copy-${i}" onclick="copyCard(${i})">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  $('topicLabel').textContent  = topic;
+  $('countBadge').textContent  = `${list.length} update${list.length !== 1 ? 's' : ''}`;
+  $('ts').textContent          = `Fetched ${new Date().toLocaleString()}  ·  Powered by NewsAPI + Groq`;
+  on($('results'), 'show');
+  on($('exportBar'), 'show');
+  $('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ── Copy card ──────────────────────────────────────────────── */
+function copyCard(i) {
+  const a   = articles[i];
+  const btn = $(`copy-${i}`);
+  const txt = `${a.headline}\nSource: ${a.source}${a.url && a.url !== '#' ? '\n' + a.url : ''}`;
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    on(btn, 'done');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+      off(btn, 'done');
+    }, 2000);
+  }).catch(() => toast('⚠️ Clipboard unavailable'));
+}
+
+/* ── Export ─────────────────────────────────────────────────── */
+async function exp(fmt) {
+  if (!articles.length) { toast('Nothing to export yet!'); return; }
+
+  const slug = topic.replace(/\s+/g,'-').toLowerCase().slice(0,30);
+  const name = `ai-colleague-${slug}-${Date.now()}`;
+  const time = new Date().toLocaleString();
+
+  /* ── TXT ── */
+  if (fmt === 'txt') {
+    const lines = [
+      `AI COLLEAGUE — ${topic.toUpperCase()}`,
+      `Generated: ${time}`,
+      `${'─'.repeat(50)}`,
+      ''
+    ];
+    articles.forEach((a, i) => {
+      lines.push(`${i+1}. [${a.category}] ${a.headline}`);
+      lines.push(`   Source : ${a.source}`);
+      if (a.url && a.url !== '#') lines.push(`   URL    : ${a.url}`);
+      lines.push('');
+    });
+    dl(lines.join('\n'), name+'.txt', 'text/plain');
+    toast('📄 TXT saved!');
+    return;
+  }
+
+  /* ── Word (HTML → .doc) ── */
+  if (fmt === 'word') {
+    const rows = articles.map((a,i) => `
+      <p style="font-size:13px;margin:0 0 3px">
+        <strong style="color:#0c4a6e">${i+1}. [${esc(a.category)}]</strong>
+        <strong>${esc(a.headline)}</strong>
+      </p>
+      <p style="font-size:11px;color:#64748b;margin:0 0 14px">
+        Source: ${esc(a.source)}
+        ${a.url && a.url !== '#' ? `&nbsp;·&nbsp;<a href="${a.url}">${a.url}</a>` : ''}
+      </p>`).join('');
+
+    const doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'>
+      <head><meta charset='utf-8'><title>AI Colleague</title></head>
+      <body style="font-family:Calibri,sans-serif;max-width:700px;margin:40px auto">
+        <h1 style="font-size:20px;color:#0ea5e9;margin-bottom:4px">
+          🛰️ AI Colleague — ${esc(topic)}
+        </h1>
+        <p style="font-size:10px;color:#94a3b8;margin-bottom:20px">
+          Generated: ${time} &nbsp;·&nbsp; Powered by NewsAPI + Groq
+        </p>
+        <hr style="border:1px solid #e2e8f0;margin-bottom:20px"/>
+        ${rows}
+      </body></html>`;
+    dl(doc, name+'.doc', 'application/msword');
+    toast('📝 Word doc saved!');
+    return;
+  }
+
+  /* ── PDF ── */
+  if (fmt === 'pdf') {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'mm', format:'a4' });
+    const M=15, PW=210, LW=PW-M*2;
+    let y = 22;
+
+    // Header
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(18);
+    doc.setTextColor(14,165,233);
+    doc.text('AI Colleague', M, y);
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(148,163,184);
+    doc.text(`Topic: ${topic}`, M, y+7);
+    doc.text(`Generated: ${time}`, M, y+12);
+    y += 20;
+
+    doc.setDrawColor(56,189,248);
+    doc.setLineWidth(0.4);
+    doc.line(M, y, PW-M, y);
+    y += 8;
+
+    articles.forEach((a,i) => {
+      if (y > 265) { doc.addPage(); y=20; }
+
+      // Category badge
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(34,211,238);
+      doc.text(`[${(a.category||'NEWS').toUpperCase()}]`, M, y);
+
+      // Headline
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10);
+      doc.setTextColor(240,249,255);
+      const hl = doc.splitTextToSize(`${i+1}. ${a.headline}`, LW);
+      hl.forEach(l => { y+=5; if(y>265){doc.addPage();y=20;} doc.text(l,M,y); });
+
+      // Source
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(125,211,252);
+      const src = `Source: ${a.source}${a.url && a.url!=='#' ? '  ·  '+a.url : ''}`;
+      const sl  = doc.splitTextToSize(src, LW);
+      sl.forEach(l => { y+=4.5; if(y>265){doc.addPage();y=20;} doc.text(l,M+2,y); });
+
+      y += 6;
+    });
+
+    // Footer
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(8);
+    doc.setTextColor(100,116,139);
+    doc.text('Powered by NewsAPI + Groq  ·  FutureProof AI Systems', M, 287);
+
+    doc.save(name+'.pdf');
+    toast('📋 PDF saved!');
+    return;
+  }
+
+  /* ── PNG / JPG via html2canvas ── */
+  toast('⏳ Rendering image…', 900);
+  try {
+    const canvas = await html2canvas($('snap'), {
+      backgroundColor : '#0a0a0f',
+      scale           : 2,
+      useCORS         : true,
+      logging         : false
+    });
+    const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+    const ext  = fmt === 'jpg' ? '.jpg' : '.png';
+    canvas.toBlob(blob => {
+      dl(blob, name+ext, mime);
+      toast(`🖼️ ${fmt.toUpperCase()} saved!`);
+    }, mime, 0.93);
+  } catch(e) {
+    toast('⚠️ Image export failed — try PDF instead');
+  }
+}
+
+/* ── Download blob ──────────────────────────────────────────── */
+function dl(content, filename, mime) {
+  const blob = content instanceof Blob ? content : new Blob([content],{type:mime});
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {href:url, download:filename});
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1200);
+}
+
+/* ── Escape HTML ────────────────────────────────────────────── */
+function esc(s='') {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+</body>
+</html>

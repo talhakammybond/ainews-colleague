@@ -1,0 +1,17 @@
+{
+  "name": "futureproof-ai-colleague",
+  "version": "1.0.0",
+  "description": "AI Colleague — Real-time news with NewsAPI + Groq",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0",
+    "node-fetch": "^3.3.2"
+  }
+}
